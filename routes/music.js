@@ -1,7 +1,10 @@
 var express = require('express');
 var router = express.Router();
 var fs = require('fs');
+var ejs = require('ejs');
+var fpath = require('path');
 var path = "";
+var music_path = '';
 
 function walk(dir,done) {
   var results = [];
@@ -45,9 +48,8 @@ router.get('/loadList', function (req, res) {
   }
 });
 
-router.post("/path", function (req,res) {
+router.post('/path', function (req,res) {
   var data = req.body.path;
-  console.log(data);
   fs.exists(data , function (exists) {
     if(exists){
       path = data;
@@ -57,6 +59,20 @@ router.post("/path", function (req,res) {
       res.json( {message :"Path do not exists !"});
     }
   });
+});
+
+router.post('/start', function (req,res) {
+  var data = req.body.id;
+  console.log(data);
+  music_path = fpath.join(path,data);
+  console.log(music_path);
+  //music_path = path + "/" + data;
+});
+
+router.get('/play', function (rq,res) {
+  res.set({'Content-Type': 'audio/mpeg'});
+  var readStream = fs.createReadStream(music_path);
+  readStream.pipe(res);
 });
 
 module.exports = router;
