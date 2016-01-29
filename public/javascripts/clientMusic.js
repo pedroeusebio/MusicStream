@@ -4,6 +4,10 @@ $(document).ready(function () {
   var source = context.createBufferSource();
   var playing = false;
   var music = "";
+  var mobile = false;
+  
+  
+  
    $('#index_form').submit(function (event) {
     event.preventDefault();
     var data = {};
@@ -21,13 +25,13 @@ $(document).ready(function () {
     $.get("/music/loadList", function (data) {
       if (data.length >= 0) {
         data = data.split('%20%');
-        for (var i = 0; i < data.length; i++ ){
+        for (var i = 0; i < data.length -1; i++ ){
           var name = data[i].split("/");
           name = name[name.length-1];
           var paragraph = "<div><label class='music_label'>" + name.split("%30")[0] + "</label>"+
           "<input type='button' value='play'  class='button_play' id='"+ name.split('%30')[1] +"'></input>"+
           "<input type='button' value='stop'  class='button_stop' id='"+ name.split('%30')[1] +"'></input></br></div>";
-          $("#music_list").append(paragraph);
+          $("#music_list").append(paragraph);   
         }
       }
     });
@@ -63,7 +67,8 @@ $(document).ready(function () {
     const id = $(this).attr('id');
     if ( id == music){ 
       context.close();
-      music = ''; 
+      music = '';
+      $(".button_play#"+id).attr('value','play');
     }
   });
   
@@ -90,5 +95,20 @@ $(document).ready(function () {
 
     request.send();
   };
+  
+  function detectmob() {
+    if( navigator.userAgent.match(/Android/i)
+      || navigator.userAgent.match(/webOS/i)
+      || navigator.userAgent.match(/iPhone/i)
+      || navigator.userAgent.match(/iPad/i)
+      || navigator.userAgent.match(/iPod/i)
+      || navigator.userAgent.match(/BlackBerry/i)
+      || navigator.userAgent.match(/Windows Phone/i)
+      ){
+        return true;
+    } else {
+      return false;
+    }
+  }
   
 });

@@ -3,6 +3,7 @@ var router = express.Router();
 var fs = require('fs');
 var ejs = require('ejs');
 var fpath = require('path');
+var Promise = require('bluebird');
 var AWS = require('aws-sdk');
 var path = "";
 var music_path = '';
@@ -38,20 +39,20 @@ function walk(dir,done) {
   return results;
 };
 
-function listAllKeys(musics){
-  var credentials = new AWS.SharedIniFileCredentials({profile: 'default'});
-  AWS.config.credentials = credentials;
-  AWS.config.update({region: 'us-east-1'});
-  var s3 =  new AWS.S3();
+function listAllKeys(){
+  connects3();
+  var s3 = new Promise.promisifyAll(new AWS.S3());
   var params = {Bucket: 'musicstreamming'};
-  s3.listObjects(params, function (err, data) {
-    if (err) console.log(err, err.stack);
-    else{
-      for( var i = 0; i < data.Contents.length; i++){
-        musics.push("s3bucket/" + data.Contents[i].Key);
-      }
-    }
+  
+  return s3.listObjectsAsync(params).then( function (data) {
+    var listMusic = [];
+    data.Contents.map(function(content) {
+      var bucketPath = "/s3bucket/" + content.Key;
+      listMusic.push(bucketPath);
+    });
+    return listMusic;
   });
+  
 }
 
 router.get('/', function (req,res) {
@@ -60,18 +61,26 @@ router.get('/', function (req,res) {
 
 router.get('/loadList', function (req, res) {
   var string_files= "";
+  var listMusic = [];
   if(path.length > 0){
     walk(path, function (err, results) {
       if (err) throw err;
-      for (var i = 0 ; i < results.length; i++){
-         string_files += results[i]+ "%30" + i + "%20%";
-        musics.push(results[i]);
-      }
-      /*listAllKeys(musics);
-      console.log(musics);*/
-      res.json(string_files);
-    });
-    
+      var i = 0;
+      results.map(function(result) {
+        string_files += result + "%30" + i + "%20%";
+        musics.push(result);
+        i++;
+      });
+      listAllKeys().then(function (listMusic) {
+        listMusic.map(function (music) {
+          string_files += music + "%30" + i + "%20%";
+          musics.push(music);
+          i++;
+        });
+        res.json(string_files);
+      });
+      
+    }); 
   }
 });
 
@@ -99,8 +108,27 @@ router.post('/start', function (req,res) {
 
 router.get('/play', function (req,res) {
   res.set({'Content-Type': 'audio/mpeg'});
-  var readStream = fs.createReadStream(music_path);
-  readStream.pipe(res);
+  console.log(music_path.split('/'));
+  if(music_path.split('/')[1] == "s3bucket") {
+    connects3();
+    var name = music_path.split('/');
+    var key = name[name.length-1];
+    
+    var s3 = new AWS.S3();
+    var params = {Bucket: 'musicstreamming', Key: key};
+    res.attachment(key);
+    var fileStream = s3.getObject(params).createReadStream();
+    fileStream.pipe(res);    
+  } else {
+    var readStream = fs.createReadStream(music_path);
+    readStream.pipe(res);
+  }
 });
+
+function connects3 () {
+  var credentials = new AWS.SharedIniFileCredentials({profile: 'default'});
+  AWS.config.credentials = credentials;
+  AWS.config.update({region: 'us-east-1'});
+}
 
 module.exports = router;
