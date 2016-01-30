@@ -1,10 +1,10 @@
 var express = require('express');
 var router = express.Router();
 var fs = require('fs');
-var ejs = require('ejs');
-var fpath = require('path');
 var Promise = require('bluebird');
 var AWS = require('aws-sdk');
+var R = require('ramda');
+
 var path = "";
 var music_path = '';
 var musics = new Array();
@@ -39,20 +39,34 @@ function walk(dir,done) {
   return results;
 };
 
+function connects3 () {
+  let credentials = new AWS.SharedIniFileCredentials({profile: 'default'});
+  AWS.config.credentials = credentials;
+  AWS.config.update({region: 'us-east-1'});
+}
+
+function getListBucket (content, listMusic) {
+  let bucketPath = "/s3bucket/" + content.Key;
+  listMusic.push(bucketPath);
+}
+
 function listAllKeys(){
   connects3();
-  var s3 = new Promise.promisifyAll(new AWS.S3());
-  var params = {Bucket: 'musicstreamming'};
-  
+  const s3 = new Promise.promisifyAll(new AWS.S3());
+  const params = {Bucket: 'musicstreamming'}; 
   return s3.listObjectsAsync(params).then( function (data) {
-    var listMusic = [];
-    data.Contents.map(function(content) {
-      var bucketPath = "/s3bucket/" + content.Key;
-      listMusic.push(bucketPath);
-    });
+    let listMusic = [];
+    R.map(content => getListBucket(content, listMusic), data.Contents);
     return listMusic;
   });
   
+}
+
+function getObjectBucket(key) {
+  connects3();
+  const s3 = new AWS.S3();
+  const params = {Bucket: 'musicstreamming', Key: key};
+  return s3.getObject(params).createReadStream();
 }
 
 router.get('/', function (req,res) {
@@ -60,26 +74,15 @@ router.get('/', function (req,res) {
 });
 
 router.get('/loadList', function (req, res) {
-  var string_files= "";
   var listMusic = [];
   if(path.length > 0){
     walk(path, function (err, results) {
       if (err) throw err;
-      var i = 0;
-      results.map(function(result) {
-        string_files += result + "%30" + i + "%20%";
-        musics.push(result);
-        i++;
-      });
+      R.map(result => musics.push(result), results);
       listAllKeys().then(function (listMusic) {
-        listMusic.map(function (music) {
-          string_files += music + "%30" + i + "%20%";
-          musics.push(music);
-          i++;
-        });
-        res.json(string_files);
+        R.map(music => musics.push(music), listMusic);
+        res.json(musics);
       });
-      
     }); 
   }
 });
@@ -99,36 +102,24 @@ router.post('/path', function (req,res) {
 });
 
 router.post('/start', function (req,res) {
-  var data = req.body.id;
+  let data = req.body.id;
   music_path = musics[data];
   music_path = music_path.replace(" ", "\ ");
-  //music_path = path + "/" + data;
   res.json("sucess !");
 });
 
 router.get('/play', function (req,res) {
   res.set({'Content-Type': 'audio/mpeg'});
-  console.log(music_path.split('/'));
   if(music_path.split('/')[1] == "s3bucket") {
-    connects3();
-    var name = music_path.split('/');
-    var key = name[name.length-1];
-    
-    var s3 = new AWS.S3();
-    var params = {Bucket: 'musicstreamming', Key: key};
+    let name = music_path.split('/');
+    let key = name[name.length-1];
     res.attachment(key);
-    var fileStream = s3.getObject(params).createReadStream();
+    let fileStream = getObjectBucket(key);
     fileStream.pipe(res);    
   } else {
-    var readStream = fs.createReadStream(music_path);
+    let readStream = fs.createReadStream(music_path);
     readStream.pipe(res);
   }
 });
-
-function connects3 () {
-  var credentials = new AWS.SharedIniFileCredentials({profile: 'default'});
-  AWS.config.credentials = credentials;
-  AWS.config.update({region: 'us-east-1'});
-}
 
 module.exports = router;

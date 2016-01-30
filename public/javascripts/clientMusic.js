@@ -24,29 +24,28 @@ $(document).ready(function () {
     }
     $.get("/music/loadList", function (data) {
       if (data.length >= 0) {
-        data = data.split('%20%');
-        for (var i = 0; i < data.length -1; i++ ){
-          var name = data[i].split("/");
+        data.map( function (music, index){
+          var name = music.split('/');
           name = name[name.length-1];
-          var paragraph = "<div><label class='music_label'>" + name.split("%30")[0] + "</label>"+
-          "<input type='button' value='play'  class='button_play' id='"+ name.split('%30')[1] +"'></input>"+
-          "<input type='button' value='stop'  class='button_stop' id='"+ name.split('%30')[1] +"'></input></br></div>";
-          $("#music_list").append(paragraph);   
-        }
+          var paragraph = "<div><label class='music_label'>" + name + "</label>"+
+          "<input type='button' value='play'  class='button_play' data-id='"+ index +"'></input>"+
+          "<input type='button' value='stop'  class='button_stop' data-id='"+ index +"'></input></br></div>";
+          $("#music_list").append(paragraph); 
+        });
       }
     });
   });
   
   $('#music_list').on("click","input.button_play",function () {
     var data = {};
-    var id = $(this).attr('id');
+    var id = $(this).attr('data-id');
     if ($(this).attr('value') == 'play') {
       if(music != '' && music == id){
         context.resume();
       } else {
         if(music != '') {
           context.close();
-          $(".button_play#"+ music).attr('value','play');
+          $(".button_play[data-id='"+ music+ "']").attr('value','play');
         }
         music = id;
         data.id = id;
@@ -64,11 +63,11 @@ $(document).ready(function () {
   });
   
   $('#music_list').on("click","input.button_stop", function () {
-    const id = $(this).attr('id');
+    const id = $(this).attr('data-id');
     if ( id == music){ 
       context.close();
       music = '';
-      $(".button_play#"+id).attr('value','play');
+      $(".button_play[data-id='"+ id + "']").attr('value','play');
     }
   });
   
@@ -78,7 +77,6 @@ $(document).ready(function () {
     context.decodeAudioData(Data, function(buffer){
       source.buffer = buffer;
       source.connect(context.destination);
-      //source.noteOn(context.currentTime);
       source.start(context.currentTime);
     });    
   };
