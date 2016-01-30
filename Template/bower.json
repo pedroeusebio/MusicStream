@@ -1,0 +1,23 @@
+{
+  "name": "Music Clone",
+  "authors": [
+    "Henrique Maio <henriquemaio@poli.ufrj.br>"
+  ],
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.6",
+    "jasny-bootstrap": "~3.1.3",
+    "font-awesome": "~4.5.0"
+  }
+}
