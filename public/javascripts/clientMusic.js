@@ -27,7 +27,7 @@ $(document).ready(function () {
         data.map( function (music, index){
           var name = music.split('/');
           name = name[name.length-1];
-          var paragraph = "<div><label class='music_label'>" + name + "</label>"+
+          var paragraph = "<div data-id='" + index + "'><label class='music_label'>" + name + "</label>"+
           "<input type='button' value='play'  class='button_play' data-id='"+ index +"'></input>"+
           "<input type='button' value='stop'  class='button_stop' data-id='"+ index +"'></input></br></div>";
           $("#music_list").append(paragraph); 
@@ -49,6 +49,8 @@ $(document).ready(function () {
         }
         music = id;
         data.id = id;
+        var sound = "<audio controls src='/music/play/"+ id + "' > </audio>";
+        $('div[data-id="' + id + '"]').append(sound);
         $.post('/music/start',data,function (result) {
           console.log(result);
         });

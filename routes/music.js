@@ -37,7 +37,7 @@ function walk(dir,done) {
     })();
   });
   return results;
-};
+}
 
 function connects3 () {
   let credentials = new AWS.SharedIniFileCredentials({profile: 'default'});
@@ -74,7 +74,6 @@ router.get('/', function (req,res) {
 });
 
 router.get('/loadList', function (req, res) {
-  var listMusic = [];
   if(path.length > 0){
     walk(path, function (err, results) {
       if (err) throw err;
@@ -93,10 +92,10 @@ router.post('/path', function (req,res) {
   fs.exists(data , function (exists) {
     if(exists){
       path = data;
-      res.json( {message :"Path added with sucess !"});
+      res.json( {message: "Path added with sucess !"});
     } else {
       path = "";
-      res.json( {message :"Path do not exists !"});
+      res.json( {message: "Path do not exists !"});
     }
   });
 });
@@ -108,8 +107,9 @@ router.post('/start', function (req,res) {
   res.json("sucess !");
 });
 
-router.get('/play', function (req,res) {
+router.get('/play/:id', function (req,res) {
   res.set({'Content-Type': 'audio/mpeg'});
+  music_path = musics[req.params.id];
   if(music_path.split('/')[1] == "s3bucket") {
     let name = music_path.split('/');
     let key = name[name.length-1];
