@@ -5,19 +5,18 @@ $(document).ready(function () {
   var playing = false;
   var music = "";
   var mobile = false;
-  
-  
-  
+  var sound = null;
+    
    $('#index_form').submit(function (event) {
     event.preventDefault();
     var data = {};
     data.path = $('#file_path').val();
-    
+
     $.post('/music/path',data, function(result) {
       alert(result.message);
     });
   });
-  
+
   $('#button_request').click(function () {
     if ($('.button_play')) {
       $('#button_request').nextAll('div').remove();
@@ -30,12 +29,12 @@ $(document).ready(function () {
           var paragraph = "<div data-id='" + index + "'><label class='music_label'>" + name + "</label>"+
           "<input type='button' value='play'  class='button_play' data-id='"+ index +"'></input>"+
           "<input type='button' value='stop'  class='button_stop' data-id='"+ index +"'></input></br></div>";
-          $("#music_list").append(paragraph); 
+          $("#music_list").append(paragraph);
         });
       }
     });
   });
-  
+
   $('#music_list').on("click","input.button_play",function () {
     var data = {};
     var id = $(this).attr('data-id');
@@ -49,30 +48,31 @@ $(document).ready(function () {
         }
         music = id;
         data.id = id;
-        var sound = "<audio controls src='/music/play/"+ id + "' > </audio>";
+        sound = "<audio controls src='/music/play/"+ id + "' > </audio>";
+        setId(id);
         $('div[data-id="' + id + '"]').append(sound);
         $.post('/music/start',data,function (result) {
           console.log(result);
         });
-        loadSound();
+        //loadSound();
       }
       $(this).attr('value','pause');
     } else if ($(this).attr('value') == 'pause' && music == id) {
       context.suspend();
       $(this).attr('value','play');
     }
-    
+
   });
-  
+
   $('#music_list').on("click","input.button_stop", function () {
     const id = $(this).attr('data-id');
-    if ( id == music){ 
+    if ( id == music){
       context.close();
       music = '';
       $(".button_play[data-id='"+ id + "']").attr('value','play');
     }
   });
-  
+
   function process(Data) {
     context = new AudioContext();
     source = context.createBufferSource(); // Create Sound Source
@@ -80,13 +80,13 @@ $(document).ready(function () {
       source.buffer = buffer;
       source.connect(context.destination);
       source.start(context.currentTime);
-    });    
+    });
   };
-  
+
   function loadSound() {
     var request = new XMLHttpRequest();
-    request.open("GET", "/music/play", true); 
-    request.responseType = "arraybuffer"; 
+    request.open("GET", "/music/play", true);
+    request.responseType = "arraybuffer";
 
     request.onload = function() {
         var Data = request.response;
@@ -95,7 +95,7 @@ $(document).ready(function () {
 
     request.send();
   };
-  
+
   function detectmob() {
     if( navigator.userAgent.match(/Android/i)
       || navigator.userAgent.match(/webOS/i)
@@ -110,5 +110,4 @@ $(document).ready(function () {
       return false;
     }
   }
-  
 });

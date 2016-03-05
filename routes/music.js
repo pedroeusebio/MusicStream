@@ -53,13 +53,15 @@ function getListBucket (content, listMusic) {
 function listAllKeys(){
   connects3();
   const s3 = new Promise.promisifyAll(new AWS.S3());
-  const params = {Bucket: 'musicstreamming'}; 
+  const params = {Bucket: 'musicstreamming'};
   return s3.listObjectsAsync(params).then( function (data) {
     let listMusic = [];
     R.map(content => getListBucket(content, listMusic), data.Contents);
     return listMusic;
+  }).catch((err) => {
+      return [];
   });
-  
+
 }
 
 function getObjectBucket(key) {
@@ -77,12 +79,15 @@ router.get('/loadList', function (req, res) {
   if(path.length > 0){
     walk(path, function (err, results) {
       if (err) throw err;
+        musics = [];
       R.map(result => musics.push(result), results);
-      listAllKeys().then(function (listMusic) {
-        R.map(music => musics.push(music), listMusic);
-        res.json(musics);
-      });
-    }); 
+        listAllKeys().then(function (listMusic) {
+            R.map(music => musics.push(music), listMusic);
+            res.json(musics);
+        }).catch( (err) => {
+            res.json(musics);
+        });
+    });
   }
 });
 
@@ -115,7 +120,7 @@ router.get('/play/:id', function (req,res) {
     let key = name[name.length-1];
     res.attachment(key);
     let fileStream = getObjectBucket(key);
-    fileStream.pipe(res);    
+    fileStream.pipe(res);
   } else {
     let readStream = fs.createReadStream(music_path);
     readStream.pipe(res);

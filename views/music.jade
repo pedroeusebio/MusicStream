@@ -1,25 +1,138 @@
 extends layout
 
 block content
-  div 
-    h1= title
-    p List of Music
-    br
-    br
-    br
-    br
-  div
-    form(id='index_form')
-      label Coloque o caminha da pasta que queira listar as musicas.
-      br
-      br
-      input(type='text', id='file_path')
-      input(type='submit', id='submit_bt', value='send')
-      br
-      br
-      br
-      br
-  div(id='music_list')
-    input(type='button', id='button_request', value='load list')
-    br
-  
+  nav.top-bar.navbar-fixed-top.navbar-inverse(role='navigation')
+    .logo-area
+      button#menu-toggle.btn.btn-link.btn-nav-sidebar-minified.pull-left(href='#', data-toggle='collapse')
+        i.fa.fa-exchange
+      button.btn.btn-link.btn-off-canvas.pull-left
+        i.icon.ion-navicon
+      .logo.pull-left
+        button.btn.btn-primary.btn-xs.btn-rightMenu(type='button', data-toggle='offcanvas') Right Menu
+    .top-bar-right.pull-right
+      .logged-user
+        .btn-group
+          a.btn.btn-link.dropdown-toggle(href='#', data-toggle='dropdown', aria-expanded='false')
+            img(src='assets/img/user-loggedin.png', alt='Henrique')
+            span.name
+              | Henrique 
+              i.fa.fa-angle-down
+          ul.dropdown-menu(role='menu')
+            li
+              a(href='#')
+                i.icon.ion-ios-person
+                span.text Profile
+            li
+              a(href='#')
+                i.icon.ion-ios-gear
+                span.text Settings
+            li
+              a(href='#')
+                i.icon.ion-power
+                span.text Logout
+  #wrapper.toggled-2.toggled
+    // Sidebar
+    #sidebar-wrapper
+      ul#menu.sidebar-nav.nav-pills.nav-stacked
+        li.active
+          a(href='#')
+            span.fa-stack.fa-lg.pull-left
+              i.fa.fa-dashboard.fa-stack-1x
+            | What's new
+        li
+          a(href='#')
+            span.fa-stack.fa-lg.pull-left
+              i.fa.fa-list-ol.fa-stack-1x
+            | Top List
+        li
+          a(href='#')
+            span.fa-stack.fa-lg.pull-left
+              i.fa.fa-headphones.fa-stack-1x
+            | Radio
+        li
+          a(href='#')
+            span.fa-stack.fa-lg.pull-left
+              i.fa.fa-star.fa-stack-1x
+            | Favorites
+        li
+          a(href='/music')
+            span.fa-stack.fa-lg.pull-left
+              i.fa.fa-server.fa-stack-1x
+            | Files
+        li
+          a(href='#')
+            span.fa-stack.fa-lg.pull-left
+              i.fa.fa-play-circle.fa-stack-1x
+            | Playlists
+        li
+          a(href='#')
+            span.fa-stack.fa-lg.pull-left
+              i.fa.fa-envelope-o.fa-stack-1x
+            | Contact
+    #page-content-wrapper
+      .row.row-offcanvas.row-offcanvas-right
+        .col-xs-12.col-sm-8.col-md-9.center-column
+          .title
+            h1 Musicas
+            p List of Music
+            div
+              form(id='index_form')
+                label Coloque o caminha da pasta que queira listar as musicas.
+                br
+                br
+                input(type='text', id='file_path')
+                input(type='submit', id='submit_bt', value='send')
+                br
+                br
+                br
+                br
+            div(id='music_list')
+              input(type='button', id='button_request', value='load list')
+              br
+        #sidebar.col-xs-12.col-sm-4.col-md-3.sidebar-offcanvas.right-column
+          .player-box
+            .player-cover
+              img(src='http://lorempixel.com/500/500')
+              span.song-name
+            .player-music
+              .player-buttons
+                div(style='height: 15px')
+                  i.fa.fa-heart(style='\
+                  float: left;\
+                  ')
+                  i.fa.fa-bars(style='\
+                  float: right;\
+                  ')
+                .trackControls
+                  button#last
+                    span.fa-stack.fa-lg
+                      i.fa.fa-circle.fa-stack-2x
+                      i.fa.fa-angle-left.fa-stack-2x.fa-gray
+                  button#play
+                    span.fa-stack.fa-lg.fa-2x
+                      i.fa.fa-circle.fa-stack-2x
+                      i#playIcon.fa.fa-play.fa-stack-1x.fa-gray
+                  button#next
+                    span.fa-stack.fa-lg
+                      i.fa.fa-circle.fa-stack-2x
+                      i.fa.fa-angle-right.fa-stack-2x.fa-gray
+                #timeline
+                  progress#seek(value='0', max='1')
+                  #time
+                    p#elapsedtime 00:00
+                    p#totaltime 00:00
+                .volumeControls.row
+                  .col-xs-3
+                    i.fa.fa-random
+                  .col-xs-6.nopadding
+                    i#volumeIcon.fa.fa-volume-down
+                    input#volume(type='range', min='0', value='50', max='100')
+                  .col-xs-3
+                    i.fa.fa-retweet
+      // /#page-content-wrapper
+  // /#wrapper
+  // jQuery
+  script(src='bower_components/jquery/dist/jquery.min.js')
+  script(src='bower_components/bootstrap/dist/js/bootstrap.min.js')
+  script(src='assets/js/scripts.js')
+
