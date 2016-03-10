@@ -3,15 +3,15 @@ $(document).ready(function () {
     $('[data-toggle="offcanvas"]').click(function () {
         $('.row-offcanvas').toggleClass('active');
     });
-    song = new Audio('/music/play/1');
+    song = new Audio('http://tonycuffe.com/mp3/tailtoddle_lo.mp3');
     songName = "Tail Toddle";
     console.log(song);
     if (song.canPlayType('audio/mpeg;')) {
         song.type = 'audio/mpeg';
-        song.src = 'http://localhost:3000/music/play/0';
+        song.src = 'http://tonycuffe.com/mp3/tailtoddle_lo.mp3';
     } else {
         song.type = 'audio/ogg';
-        song.src = 'http://localhost:3000/music/play/0';
+        song.src = 'http://tonycuffe.com/mp3/tailtoddle_lo.mp3';
     }
 
     song.ontimeupdate = function () {
@@ -48,17 +48,18 @@ $(document).ready(function () {
 function setId(id) {
     song_id = id;
     song.pause();
+    var ip = "<?php echo $_SERVER['SERVER_ADDR']; ?>";
+    alert(ip);
     song = new Audio('/music/play/'+ id);
-    $('#play').click();
     console.log(song);
-if (song.canPlayType('audio/mpeg;')) {
+    if (song.canPlayType('audio/mpeg;')) {
         song.type = 'audio/mpeg';
-        song.src = 'http://localhost:3000/music/play/'+ id;
+        song.src = '/music/play/'+ id;
     } else {
         song.type = 'audio/ogg';
-        song.src = 'http://localhost:3000/music/play/'+ id;
+        song.src = '/music/play/'+ id;
     }
-
+    $('#play').click();
     song.ontimeupdate = function () {
         updateTime();
     };

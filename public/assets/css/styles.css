@@ -664,3 +664,7 @@
     display: flex;
     justify-content: center;
 }
+
+#file_path, #submit_bt,#music_list  {
+    color: #000 !important;
+}

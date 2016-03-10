@@ -25,15 +25,21 @@ $(document).ready(function () {
       if (data.length >= 0) {
         data.map( function (music, index){
           var name = music.split('/');
-          name = name[name.length-1];
+            name = name[name.length-1];
+            name =  name.split('.mp3')[0];
           var paragraph = "<div data-id='" + index + "'><label class='music_label'>" + name + "</label>"+
           "<input type='button' value='play'  class='button_play' data-id='"+ index +"'></input>"+
           "<input type='button' value='stop'  class='button_stop' data-id='"+ index +"'></input></br></div>";
+            paragraph = "<div  data-id='" + index + "'><label data-id='" + index + "'class='music_label'>" + name + "</label></div>";
           $("#music_list").append(paragraph);
         });
       }
     });
   });
+    $('#music_list').on('click','label.music_label', function(){
+        var id = $(this).attr('data-id');
+        setId(id);
+    });
 
   $('#music_list').on("click","input.button_play",function () {
     var data = {};
@@ -50,7 +56,7 @@ $(document).ready(function () {
         data.id = id;
         sound = "<audio controls src='/music/play/"+ id + "' > </audio>";
         setId(id);
-        $('div[data-id="' + id + '"]').append(sound);
+        //$('div[data-id="' + id + '"]').append(sound);
         $.post('/music/start',data,function (result) {
           console.log(result);
         });
